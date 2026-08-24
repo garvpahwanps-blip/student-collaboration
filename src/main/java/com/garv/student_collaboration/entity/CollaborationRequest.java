@@ -37,7 +37,7 @@ public class CollaborationRequest {
     @NotBlank(message = "description can not be empty")
     private String description;
     @NotNull(message = "weeklyHours are needed")
-    @Min(0)
+    @Min(1)
     @Max(45)
     private Integer weeklyHours;
     @NotNull(message = "Please provide the collaboration mode")
