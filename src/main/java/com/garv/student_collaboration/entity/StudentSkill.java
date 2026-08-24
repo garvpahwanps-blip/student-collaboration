@@ -29,8 +29,9 @@ public class StudentSkill {
     @JoinColumn(name = "skill_id", nullable = false)
     private Skill skill;
     @NotNull(message = "Level is required")
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Level level;
-    private boolean learningStatus;
+    private boolean learning;
 
 }

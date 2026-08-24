@@ -26,15 +26,16 @@ public class Goal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotBlank
+    @NotBlank(message = "Description is required")
+    @Column(nullable = false, length = 250)
     private String description;
-    @NotNull
+    @NotNull(message = "priority is required")
     @Enumerated(EnumType.STRING)
     private Priority priority;
-    @NotNull
+    @NotNull(message = "type is required")
     @Enumerated(EnumType.STRING)
     private Type type;
-    @NotNull
+    @NotNull(message = "Status is required")
     @Enumerated(EnumType.STRING)
     private Status status;
     @ManyToOne(fetch = FetchType.LAZY)

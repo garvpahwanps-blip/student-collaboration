@@ -5,10 +5,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.hibernate.validator.constraints.UniqueElements;
-
 
 import java.time.LocalDate;
+import java.util.Locale;
 
 @Getter
 @Setter
@@ -30,8 +29,15 @@ public class Student {
     private String fullName;
     @NotBlank(message = "email can not be blank")
     @Email(message = "please enter a valid email")
-    @Column(unique = true)
+    @Column(unique = true, nullable = false,length = 255)
     private String email;
+    @PrePersist
+    @PreUpdate
+    public void formatData() {
+        if (email != null) {
+            email = email.trim().toLowerCase(Locale.ROOT);
+        }
+    }
     private String university;
     private LocalDate birthDate;
     @Enumerated(EnumType.STRING)

@@ -43,7 +43,7 @@ public class CollaborationRequest {
     @NotNull(message = "Please provide the collaboration mode")
     @Enumerated(EnumType.STRING)
     private CollaborationMode collaborationMode;
-    @NotNull(message = "Please provide status ")
+    @NotNull(message = "Please provide status")
     @Enumerated(EnumType.STRING)
     private Status status;
 

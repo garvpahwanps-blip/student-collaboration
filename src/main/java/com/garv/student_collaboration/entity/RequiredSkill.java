@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"collaborationRequest_id","skill_id"})
+        @UniqueConstraint(columnNames = {"collaboration_request_id","skill_id"})
 })
 @Entity
 public class RequiredSkill {
