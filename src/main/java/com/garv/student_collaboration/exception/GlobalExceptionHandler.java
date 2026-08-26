@@ -33,4 +33,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleSkillNotFoundException(SkillNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
+    @ExceptionHandler(DuplicateStudentSkillException.class)
+    public ResponseEntity<String> handleStudentSkillException(DuplicateStudentSkillException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
 }
