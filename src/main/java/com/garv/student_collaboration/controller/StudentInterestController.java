@@ -20,7 +20,7 @@ public class StudentInterestController {
     public StudentInterestResponse createStudentInterest(@RequestBody @Valid StudentInterestRequest studentInterestRequest){
         return studentInterestService.createStudentInterest(studentInterestRequest);
     }
-    @GetMapping("/students/{studentId}/interests")
+    @GetMapping("/student/{studentId}/interests")
     public List<StudentInterestResponse> getAllStudentInterestByStudentId(@PathVariable Long studentId){
         return studentInterestService.getAllInterestByStudentId(studentId);
     }

@@ -14,6 +14,9 @@ import com.garv.student_collaboration.repository.StudentSkillRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class StudentSkillService {
@@ -49,6 +52,17 @@ public class StudentSkillService {
         }
         StudentSkill savedStudentSkill =studentSkillRepository.save(toEntity(studentSkillRequest,student,skill));
         return toResponse(savedStudentSkill);
+    }
+    public List<StudentSkillResponse> getAllStudentSkills(Long studentId) {
+        if(!studentRepository.existsById(studentId)) {
+            throw new StudentNotFoundException("Student not found");
+        }
+        List<StudentSkill> studentSkills = studentSkillRepository.findAllByStudent_Id(studentId);
+        List<StudentSkillResponse> studentSkillResponses = new ArrayList<>();
+        for (StudentSkill studentSkill : studentSkills) {
+            studentSkillResponses.add(toResponse(studentSkill));
+        }
+        return studentSkillResponses;
     }
 
 

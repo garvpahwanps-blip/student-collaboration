@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -17,6 +19,10 @@ public class StudentSkillController {
     @ResponseStatus(HttpStatus.CREATED)
     public StudentSkillResponse createStudentSkill(@Valid @RequestBody StudentSkillRequest studentSkillRequest) {
         return studentSkillService.createStudentSkill(studentSkillRequest);
+    }
+    @GetMapping("/student/{studentId}/interests")
+    public List<StudentSkillResponse> getAllStudentInterestByStudentId(@PathVariable Long studentId) {
+        return studentSkillService.getAllStudentSkills(studentId);
     }
 
 }
