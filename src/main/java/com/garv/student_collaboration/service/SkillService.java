@@ -32,7 +32,7 @@ public class SkillService {
                 .build();
     }
     public SkillResponse createSkill(SkillRequest skillRequest) {
-        String normalizedName = skillRequest.getName().toLowerCase(Locale.ROOT).trim();
+        String normalizedName = skillRequest.getName().toLowerCase(Locale.ROOT).trim().replaceAll("\\s+", " ");
         Optional<Skill> existingSkill = skillRepository.findByName(normalizedName);
         if (existingSkill.isPresent()) {
             throw new DuplicateSkillException(normalizedName + " already exists");

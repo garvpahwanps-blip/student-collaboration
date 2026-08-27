@@ -37,4 +37,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleStudentSkillException(DuplicateStudentSkillException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
+    @ExceptionHandler(DuplicateInterestException.class)
+    public ResponseEntity<String> handleDuplicateInterestException(DuplicateInterestException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
+    @ExceptionHandler(InterestNotFoundException.class)
+    public ResponseEntity<String> handleInterestNotFoundException(InterestNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
 }

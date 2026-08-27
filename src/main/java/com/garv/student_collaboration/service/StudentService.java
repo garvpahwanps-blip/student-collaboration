@@ -41,7 +41,7 @@ public class StudentService {
                 .build();
     }
     public StudentResponse createStudent(CreateStudentRequest request){
-        String normalizedEmail = request.getEmail().toLowerCase(Locale.ROOT).trim();
+        String normalizedEmail = request.getEmail().toLowerCase(Locale.ROOT).trim().replaceAll("\\s+", " ");
         if(studentRepository.existsByEmail(normalizedEmail)){
             throw new DuplicateEmailException(normalizedEmail+" already exists");
         }
