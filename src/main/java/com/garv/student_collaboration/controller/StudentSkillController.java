@@ -20,8 +20,8 @@ public class StudentSkillController {
     public StudentSkillResponse createStudentSkill(@Valid @RequestBody StudentSkillRequest studentSkillRequest) {
         return studentSkillService.createStudentSkill(studentSkillRequest);
     }
-    @GetMapping("/student/{studentId}/interests")
-    public List<StudentSkillResponse> getAllStudentInterestByStudentId(@PathVariable Long studentId) {
+    @GetMapping("/student/{studentId}/skills")
+    public List<StudentSkillResponse> getAllStudentSkillByStudentId(@PathVariable Long studentId) {
         return studentSkillService.getAllStudentSkills(studentId);
     }
 
