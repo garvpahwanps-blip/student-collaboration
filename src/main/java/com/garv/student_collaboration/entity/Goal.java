@@ -11,6 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
+@Table(name = "goals")
 public class Goal {
     public enum Status {
         NOT_STARTED,
@@ -30,12 +31,15 @@ public class Goal {
     @Column(nullable = false, length = 250)
     private String description;
     @NotNull(message = "priority is required")
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Priority priority;
     @NotNull(message = "type is required")
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Type type;
     @NotNull(message = "Status is required")
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;
     @ManyToOne(fetch = FetchType.LAZY)
