@@ -2,6 +2,7 @@ package com.garv.student_collaboration.controller;
 
 import com.garv.student_collaboration.dto.GoalRequest;
 import com.garv.student_collaboration.dto.GoalResponse;
+import com.garv.student_collaboration.dto.UpdateGoalStatusRequest;
 import com.garv.student_collaboration.service.GoalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +25,12 @@ public class GoalController {
     public GoalResponse getGoalById(@PathVariable Long id){
         return goalService.getGoalById(id);
     }
-    @GetMapping("/students/{id}/goals")
+    @GetMapping("/students/{studentId}/goals")
     public List<GoalResponse> getGoalsByStudentId(@PathVariable Long studentId){
         return goalService.getGoalsByStudentId(studentId);
+    }
+    @PatchMapping("/goals/{id}/status")
+    public GoalResponse updateGoalStatus(@PathVariable Long id, @Valid @RequestBody UpdateGoalStatusRequest updateGoalStatusRequest){
+        return goalService.updateGoalStatus(id, updateGoalStatusRequest);
     }
 }

@@ -2,6 +2,7 @@ package com.garv.student_collaboration.service;
 
 import com.garv.student_collaboration.dto.GoalRequest;
 import com.garv.student_collaboration.dto.GoalResponse;
+import com.garv.student_collaboration.dto.UpdateGoalStatusRequest;
 import com.garv.student_collaboration.entity.Goal;
 import com.garv.student_collaboration.entity.Student;
 import com.garv.student_collaboration.exception.GoalNotFoundException;
@@ -10,6 +11,7 @@ import com.garv.student_collaboration.repository.GoalRepository;
 import com.garv.student_collaboration.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,10 +45,12 @@ public class GoalService {
         goal.setStatus(Goal.Status.NOT_STARTED);
         return toResponse(goalRepository.save(goal));
     }
+    @Transactional(readOnly = true)
     public GoalResponse getGoalById(Long id) {
         Goal goal = goalRepository.findById(id).orElseThrow(() -> new GoalNotFoundException("Goal not found"));
         return toResponse(goal);
     }
+    @Transactional(readOnly = true)
     public List<GoalResponse> getGoalsByStudentId(Long studentId) {
         if(studentRepository.findById(studentId).isEmpty()) {
             throw new StudentNotFoundException("Student not found");
@@ -57,6 +61,11 @@ public class GoalService {
             responses.add(toResponse(goal));
         }
         return responses;
+    }
+    public GoalResponse updateGoalStatus(Long id, UpdateGoalStatusRequest updateGoalStatusRequest) {
+        Goal goal = goalRepository.findById(id).orElseThrow(() -> new GoalNotFoundException("Goal not found"));
+        goal.setStatus(updateGoalStatusRequest.getStatus());
+        return toResponse(goalRepository.save(goal));
     }
 
 }
