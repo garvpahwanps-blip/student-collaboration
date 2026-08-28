@@ -53,4 +53,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleGoalNotFoundException(GoalNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
+    @ExceptionHandler(GoalNotBelongsToStudentException.class)
+    public ResponseEntity<String> handleGoalNotBelongsToStudentException(GoalNotBelongsToStudentException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+    @ExceptionHandler(CollaborationRequestNotFoundException.class)
+    public ResponseEntity<String> handleCollaborationRequestNotFoundException(CollaborationRequestNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
 }
