@@ -61,4 +61,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleCollaborationRequestNotFoundException(CollaborationRequestNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
+    @ExceptionHandler(DuplicateRequiredSkillException.class)
+    public ResponseEntity<String> handleDuplicateRequiredSkillException(DuplicateRequiredSkillException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
+    @ExceptionHandler(RequiredSkillNotFoundException.class)
+    public ResponseEntity<String> handleRequiredSkillNotFound(RequiredSkillNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
 }

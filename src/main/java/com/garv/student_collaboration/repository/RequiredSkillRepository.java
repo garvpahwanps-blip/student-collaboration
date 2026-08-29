@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface RequiredSkillRepository extends JpaRepository<RequiredSkill,Long> {
    List<RequiredSkill> findAllByCollaborationRequest_Id(Long collaboration_request_id);
+   boolean existsByCollaborationRequest_IdAndSkill_Id(Long collaboration_request_id, Long skill_id);
 }
