@@ -14,6 +14,7 @@ import com.garv.student_collaboration.repository.RequiredSkillRepository;
 import com.garv.student_collaboration.repository.SkillRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,4 +73,14 @@ public class RequiredSkillService {
         }
         requiredSkillRepository.deleteById(requiredSkillId);
     }
+    @Transactional
+    public List<RequiredSkillResponse> createRequiredSkills(List<RequiredSkillRequest> requests) {
+        List<RequiredSkillResponse> responses = new ArrayList<>();
+        for(RequiredSkillRequest request : requests){
+            RequiredSkillResponse response = createRequiredSkill(request);
+            responses.add(response);
+        }
+        return responses;
+    }
+
 }

@@ -33,4 +33,9 @@ public class RequiredSkillController {
     public void deleteRequiredSkillById(@PathVariable("id") Long id) {
         requiredSkillService.deleteRequiredSkillById(id);
     }
+    @PostMapping("/required-skills/approve")
+    @ResponseStatus(HttpStatus.CREATED)
+    public List<RequiredSkillResponse> approveRequiredSkills(@RequestBody @Valid List<RequiredSkillRequest> requiredSkillRequests) {
+        return requiredSkillService.createRequiredSkills(requiredSkillRequests);
+    }
 }
