@@ -46,6 +46,8 @@ public class Student {
     @NotNull(message = "year of Study is required")
     @Enumerated(EnumType.STRING)
     private YearOfStudy yearOfStudy;
+    @Column(nullable = false,length = 100)
+    private String passwordHash;
 
 
 }
