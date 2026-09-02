@@ -69,4 +69,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleRequiredSkillNotFound(RequiredSkillNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
+    @ExceptionHandler(InvalidCredentialException.class)
+    public ResponseEntity<String> handleInvalidCredentialException(InvalidCredentialException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+    }
 }

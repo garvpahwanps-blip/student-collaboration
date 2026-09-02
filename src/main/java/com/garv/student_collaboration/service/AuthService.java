@@ -1,9 +1,12 @@
 package com.garv.student_collaboration.service;
 
+import com.garv.student_collaboration.dto.LoginRequest;
+import com.garv.student_collaboration.dto.LoginResponse;
 import com.garv.student_collaboration.dto.RegisterRequest;
 import com.garv.student_collaboration.dto.StudentResponse;
 import com.garv.student_collaboration.entity.Student;
 import com.garv.student_collaboration.exception.DuplicateEmailException;
+import com.garv.student_collaboration.exception.InvalidCredentialException;
 import com.garv.student_collaboration.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +19,7 @@ import java.util.Locale;
 public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final StudentRepository studentRepository;
+    private final JwtService jwtService;
     private StudentResponse toStudentResponse(Student student){
         return StudentResponse.builder()
                 .id(student.getId())
@@ -44,8 +48,17 @@ public class AuthService {
                 .yearOfStudy(registerRequest.getYearOfStudy())
                 .passwordHash(hashedPassword).build()));
         return savedStudent;
-
-
-
+    }
+    public LoginResponse login(LoginRequest loginRequest) {
+        String normalizedEmail = loginRequest.getEmail().trim().toLowerCase(Locale.ROOT);
+        Student student = studentRepository.findByEmail(normalizedEmail).orElseThrow(()->new InvalidCredentialException("Invalid email or password"));
+        if(!passwordEncoder.matches(loginRequest.getPassword(), student.getPasswordHash())){
+            throw new InvalidCredentialException("Invalid email or password");
+        }
+        String accessToken = jwtService.generateToken(student.getId());
+        return LoginResponse.builder()
+                .accessToken(accessToken)
+                .student(toStudentResponse(student))
+                .build();
     }
 }

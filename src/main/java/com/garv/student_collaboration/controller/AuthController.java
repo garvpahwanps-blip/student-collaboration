@@ -1,5 +1,7 @@
 package com.garv.student_collaboration.controller;
 
+import com.garv.student_collaboration.dto.LoginRequest;
+import com.garv.student_collaboration.dto.LoginResponse;
 import com.garv.student_collaboration.dto.RegisterRequest;
 import com.garv.student_collaboration.dto.StudentResponse;
 import com.garv.student_collaboration.service.AuthService;
@@ -17,5 +19,10 @@ public class AuthController {
     @PostMapping("/register")
     public StudentResponse register(@Valid @RequestBody RegisterRequest registerRequest){
         return authService.register(registerRequest);
+    }
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/login")
+    public LoginResponse login(@Valid @RequestBody LoginRequest loginRequest){
+        return authService.login(loginRequest);
     }
 }
