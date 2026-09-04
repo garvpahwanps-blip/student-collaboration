@@ -7,6 +7,7 @@ import com.garv.student_collaboration.dto.StudentResponse;
 import com.garv.student_collaboration.entity.Student;
 import com.garv.student_collaboration.exception.DuplicateEmailException;
 import com.garv.student_collaboration.exception.InvalidCredentialException;
+import com.garv.student_collaboration.exception.StudentNotFoundException;
 import com.garv.student_collaboration.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -60,5 +61,9 @@ public class AuthService {
                 .accessToken(accessToken)
                 .student(toStudentResponse(student))
                 .build();
+    }
+    public StudentResponse getCurrentStudent(Long studentId){
+        Student student =studentRepository.findById(studentId).orElseThrow(()->new StudentNotFoundException("Student not found"));
+        return  toStudentResponse(student);
     }
 }

@@ -8,6 +8,7 @@ import com.garv.student_collaboration.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,5 +25,10 @@ public class AuthController {
     @PostMapping("/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest loginRequest){
         return authService.login(loginRequest);
+    }
+    @GetMapping("/me")
+    public StudentResponse getCurrentStudent(Authentication authentication){
+        Long studentId = (Long) authentication.getPrincipal();
+        return authService.getCurrentStudent(studentId);
     }
 }

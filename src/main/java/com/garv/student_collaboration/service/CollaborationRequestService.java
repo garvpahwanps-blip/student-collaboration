@@ -47,11 +47,12 @@ public class CollaborationRequestService {
                 .weeklyHours(collaborationRequest.getWeeklyHours())
                 .build();
     }
-    public CollaborationRequestResponse createCollaborationRequest(CollaborationRequestRequest collaborationRequestRequest){
-        Student createdBy = studentRepository.findById(collaborationRequestRequest.getCreatedById()).orElseThrow(()->new StudentNotFoundException("student not found"));
+    public CollaborationRequestResponse createCollaborationRequest(CollaborationRequestRequest collaborationRequestRequest,Long studentId){
+        Student createdBy = studentRepository.findById(studentId).orElseThrow(()->new StudentNotFoundException("student not found"));
         Goal goal = goalRepository.findById(collaborationRequestRequest.getGoalId()).orElseThrow(()->new GoalNotFoundException("goal not found"));
+
         if(!(goal.getStudent().getId().equals(createdBy.getId()))){
-            throw  new GoalNotBelongsToStudentException("goal not found");
+            throw  new GoalNotBelongsToStudentException("Goal does not belong to the authenticated student");
         }
         CollaborationRequest collaborationRequest =  toEntity(collaborationRequestRequest, createdBy, goal);
         collaborationRequest.setStatus(CollaborationRequest.Status.OPEN);

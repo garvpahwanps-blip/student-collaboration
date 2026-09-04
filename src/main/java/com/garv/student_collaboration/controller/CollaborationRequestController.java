@@ -6,6 +6,7 @@ import com.garv.student_collaboration.service.CollaborationRequestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,8 +18,9 @@ public class CollaborationRequestController {
     private final CollaborationRequestService collaborationRequestService;
     @PostMapping("/collaboration-requests")
     @ResponseStatus(HttpStatus.CREATED)
-    public CollaborationRequestResponse createCollaborationRequest(@Valid @RequestBody CollaborationRequestRequest collaborationRequestRequest){
-        return collaborationRequestService.createCollaborationRequest(collaborationRequestRequest);
+    public CollaborationRequestResponse createCollaborationRequest(@Valid @RequestBody CollaborationRequestRequest collaborationRequestRequest, Authentication authentication){
+        Long studentId = (Long) authentication.getPrincipal();
+        return collaborationRequestService.createCollaborationRequest(collaborationRequestRequest,studentId);
     }
     @GetMapping("/collaboration-requests/{id}")
     public CollaborationRequestResponse getCollaborationRequestById(@PathVariable Long id){

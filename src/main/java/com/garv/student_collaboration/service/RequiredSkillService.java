@@ -5,10 +5,7 @@ import com.garv.student_collaboration.dto.RequiredSkillResponse;
 import com.garv.student_collaboration.entity.CollaborationRequest;
 import com.garv.student_collaboration.entity.RequiredSkill;
 import com.garv.student_collaboration.entity.Skill;
-import com.garv.student_collaboration.exception.CollaborationRequestNotFoundException;
-import com.garv.student_collaboration.exception.DuplicateRequiredSkillException;
-import com.garv.student_collaboration.exception.RequiredSkillNotFoundException;
-import com.garv.student_collaboration.exception.SkillNotFoundException;
+import com.garv.student_collaboration.exception.*;
 import com.garv.student_collaboration.repository.CollaborationRequestRepository;
 import com.garv.student_collaboration.repository.RequiredSkillRepository;
 import com.garv.student_collaboration.repository.SkillRepository;
@@ -43,9 +40,12 @@ public class RequiredSkillService {
                 .importance(requiredSkillRequest.getImportance())
                 .build();
     }
-    public RequiredSkillResponse createRequiredSkill(RequiredSkillRequest requiredSkillRequest) {
+    public RequiredSkillResponse createRequiredSkill(RequiredSkillRequest requiredSkillRequest,Long studentId) {
         CollaborationRequest collaborationRequest = collaborationRequestRepository.findById(requiredSkillRequest.getCollaborationRequestId()).orElseThrow(()->new CollaborationRequestNotFoundException("CollaborationRequest not found"));
         Skill skill = skillRepository.findById(requiredSkillRequest.getSkillId()).orElseThrow(()->new SkillNotFoundException("Required skill not found"));
+        if(!collaborationRequest.getCreatedBy().getId().equals(studentId)) {
+            throw new AuthorizationException("this collaboration request belongs to other user");
+        }
         if(requiredSkillRepository.existsByCollaborationRequest_IdAndSkill_Id(collaborationRequest.getId(),skill.getId())){
             throw new DuplicateRequiredSkillException("This skill is already required for the collaboration request");
         }
@@ -67,17 +67,18 @@ public class RequiredSkillService {
         }
         return requiredSkillResponses;
     }
-    public void deleteRequiredSkillById(Long requiredSkillId) {
-        if(!requiredSkillRepository.existsById(requiredSkillId)) {
-            throw new RequiredSkillNotFoundException("Required skill not found");
+    public void deleteRequiredSkillById(Long requiredSkillId,Long studentId) {
+        RequiredSkill requiredSkill = requiredSkillRepository.findById(requiredSkillId).orElseThrow(()->new RequiredSkillNotFoundException("Required skill not found"));
+        if(!requiredSkill.getCollaborationRequest().getCreatedBy().getId().equals(studentId)) {
+            throw new AuthorizationException("this collaboration request belongs to other user");
         }
-        requiredSkillRepository.deleteById(requiredSkillId);
+        requiredSkillRepository.delete(requiredSkill);
     }
     @Transactional
-    public List<RequiredSkillResponse> createRequiredSkills(List<RequiredSkillRequest> requests) {
+    public List<RequiredSkillResponse> createRequiredSkills(List<RequiredSkillRequest> requests,Long studentId) {
         List<RequiredSkillResponse> responses = new ArrayList<>();
         for(RequiredSkillRequest request : requests){
-            RequiredSkillResponse response = createRequiredSkill(request);
+            RequiredSkillResponse response = createRequiredSkill(request,studentId);
             responses.add(response);
         }
         return responses;

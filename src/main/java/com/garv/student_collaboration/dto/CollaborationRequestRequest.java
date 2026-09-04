@@ -13,8 +13,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class CollaborationRequestRequest {
-    @NotNull(message = "Id is required of the Student who created it")
-    private Long createdById;
     @NotNull(message = "Goal id is required")
     private Long goalId;
     @NotBlank(message = "Title can not be blank")

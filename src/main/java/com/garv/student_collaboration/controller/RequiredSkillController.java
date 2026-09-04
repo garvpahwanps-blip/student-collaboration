@@ -6,6 +6,7 @@ import com.garv.student_collaboration.service.RequiredSkillService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,8 +18,9 @@ public class RequiredSkillController {
     private final RequiredSkillService requiredSkillService;
     @PostMapping("/required-skills")
     @ResponseStatus(HttpStatus.CREATED)
-    public RequiredSkillResponse createRequiredSkill(@Valid @RequestBody RequiredSkillRequest requiredSkillRequest) {
-        return requiredSkillService.createRequiredSkill(requiredSkillRequest);
+    public RequiredSkillResponse createRequiredSkill(@Valid @RequestBody RequiredSkillRequest requiredSkillRequest, Authentication authentication) {
+        Long studentId = (Long) authentication.getPrincipal();
+        return requiredSkillService.createRequiredSkill(requiredSkillRequest,studentId);
     }
     @GetMapping("/required-skills/{id}")
     public RequiredSkillResponse getRequiredSkillById(@PathVariable("id") Long id) {
@@ -30,12 +32,14 @@ public class RequiredSkillController {
     }
     @DeleteMapping("/required-skills/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteRequiredSkillById(@PathVariable("id") Long id) {
-        requiredSkillService.deleteRequiredSkillById(id);
+    public void deleteRequiredSkillById(@PathVariable("id") Long id, Authentication authentication) {
+        Long studentId = (Long) authentication.getPrincipal();
+        requiredSkillService.deleteRequiredSkillById(id,studentId);
     }
     @PostMapping("/required-skills/approve")
     @ResponseStatus(HttpStatus.CREATED)
-    public List<RequiredSkillResponse> approveRequiredSkills(@RequestBody @Valid List<RequiredSkillRequest> requiredSkillRequests) {
-        return requiredSkillService.createRequiredSkills(requiredSkillRequests);
+    public List<RequiredSkillResponse> approveRequiredSkills(@RequestBody  List<@Valid RequiredSkillRequest> requiredSkillRequests, Authentication authentication) {
+        Long studentId = (Long) authentication.getPrincipal();
+        return requiredSkillService.createRequiredSkills(requiredSkillRequests,studentId);
     }
 }
