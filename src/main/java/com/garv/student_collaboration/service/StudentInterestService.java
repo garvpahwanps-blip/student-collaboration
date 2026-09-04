@@ -1,6 +1,5 @@
 package com.garv.student_collaboration.service;
 
-import com.garv.student_collaboration.dto.InterestResponse;
 import com.garv.student_collaboration.dto.StudentInterestRequest;
 import com.garv.student_collaboration.dto.StudentInterestResponse;
 import com.garv.student_collaboration.entity.Interest;
@@ -38,8 +37,8 @@ public class StudentInterestService {
                 .student(student)
                 .build();
     }
-    public StudentInterestResponse createStudentInterest(StudentInterestRequest studentInterestRequest) {
-        Student student = studentRepository.findById(studentInterestRequest.getStudentId()).orElseThrow(()->new StudentNotFoundException("Student not found"));
+    public StudentInterestResponse createStudentInterest(StudentInterestRequest studentInterestRequest,Long studentId) {
+        Student student = studentRepository.findById(studentId).orElseThrow(()->new StudentNotFoundException("Student not found"));
         Interest interest = interestRepository.findById(studentInterestRequest.getInterestId()).orElseThrow(()->new InterestNotFoundException("Interest not found"));
         if(studentInterestRepository.existsByStudent_IdAndInterest_Id(student.getId(), interest.getId())) {
             throw new DuplicateStudentInterestException("Student already has this interest");
@@ -48,11 +47,11 @@ public class StudentInterestService {
         return toResponse(studentInterest);
 
     }
-    public List<StudentInterestResponse> getAllInterestByStudentId(Long StudentId) {
-        if(!studentRepository.existsById(StudentId)){
+    public List<StudentInterestResponse> getAllInterestByStudentId(Long studentId) {
+        if(!studentRepository.existsById(studentId)){
             throw new StudentNotFoundException("Student not found");
         }
-        List<StudentInterest> studentInterests = studentInterestRepository.findAllByStudent_Id(StudentId);
+        List<StudentInterest> studentInterests = studentInterestRepository.findAllByStudent_Id(studentId);
         List<StudentInterestResponse> studentInterestResponses = new ArrayList<>();
         for (StudentInterest studentInterest : studentInterests) {
             studentInterestResponses.add(toResponse(studentInterest));

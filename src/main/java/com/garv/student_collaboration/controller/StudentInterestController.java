@@ -6,6 +6,7 @@ import com.garv.student_collaboration.service.StudentInterestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,8 +18,9 @@ public class StudentInterestController {
     private final StudentInterestService studentInterestService;
     @PostMapping("/student-interests")
     @ResponseStatus(HttpStatus.CREATED)
-    public StudentInterestResponse createStudentInterest(@RequestBody @Valid StudentInterestRequest studentInterestRequest){
-        return studentInterestService.createStudentInterest(studentInterestRequest);
+    public StudentInterestResponse createStudentInterest(@RequestBody @Valid StudentInterestRequest studentInterestRequest, Authentication authentication) {
+        Long studentId = (Long) authentication.getPrincipal();
+        return studentInterestService.createStudentInterest(studentInterestRequest,studentId);
     }
     @GetMapping("/student/{studentId}/interests")
     public List<StudentInterestResponse> getAllStudentInterestByStudentId(@PathVariable Long studentId){

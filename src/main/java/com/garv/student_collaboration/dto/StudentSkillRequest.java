@@ -10,8 +10,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class StudentSkillRequest {
-    @NotNull(message = "Student ID is required")
-    private Long studentId;
     @NotNull(message = "Skill ID is required")
     private Long skillId;
     @NotNull(message = "Level is required")

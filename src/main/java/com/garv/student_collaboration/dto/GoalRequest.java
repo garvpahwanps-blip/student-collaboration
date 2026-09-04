@@ -17,6 +17,4 @@ public class GoalRequest {
     private Goal.Priority priority;
     @NotNull(message = "type is required")
     private Goal.Type type;
-    @NotNull(message = "Student id is required")
-    private Long studentId;
 }

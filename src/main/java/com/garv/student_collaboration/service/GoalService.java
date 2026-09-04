@@ -5,6 +5,7 @@ import com.garv.student_collaboration.dto.GoalResponse;
 import com.garv.student_collaboration.dto.UpdateGoalStatusRequest;
 import com.garv.student_collaboration.entity.Goal;
 import com.garv.student_collaboration.entity.Student;
+import com.garv.student_collaboration.exception.AuthorizationException;
 import com.garv.student_collaboration.exception.GoalNotFoundException;
 import com.garv.student_collaboration.exception.StudentNotFoundException;
 import com.garv.student_collaboration.repository.GoalRepository;
@@ -39,8 +40,8 @@ public class GoalService {
                 .type(goalRequest.getType())
                 .build();
     }
-    public GoalResponse createGoal(GoalRequest goalRequest) {
-        Student student = studentRepository.findById(goalRequest.getStudentId()).orElseThrow(()-> new StudentNotFoundException("Student not found"));
+    public GoalResponse createGoal(GoalRequest goalRequest,Long studentId) {
+        Student student = studentRepository.findById(studentId).orElseThrow(()-> new StudentNotFoundException("Student not found"));
         Goal goal = toEntity(goalRequest, student);
         goal.setStatus(Goal.Status.NOT_STARTED);
         return toResponse(goalRepository.save(goal));
@@ -62,8 +63,12 @@ public class GoalService {
         }
         return responses;
     }
-    public GoalResponse updateGoalStatus(Long id, UpdateGoalStatusRequest updateGoalStatusRequest) {
+    public GoalResponse updateGoalStatus(Long id, UpdateGoalStatusRequest updateGoalStatusRequest,Long studentId) {
+
         Goal goal = goalRepository.findById(id).orElseThrow(() -> new GoalNotFoundException("Goal not found"));
+        if(!goal.getStudent().getId().equals(studentId)) {
+            throw new AuthorizationException("Can not update other student goal");
+        }
         goal.setStatus(updateGoalStatusRequest.getStatus());
         return toResponse(goalRepository.save(goal));
     }

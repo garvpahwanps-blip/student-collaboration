@@ -5,6 +5,7 @@ import com.garv.student_collaboration.dto.StudentSkillResponse;
 import com.garv.student_collaboration.entity.Skill;
 import com.garv.student_collaboration.entity.Student;
 import com.garv.student_collaboration.entity.StudentSkill;
+import com.garv.student_collaboration.exception.AuthorizationException;
 import com.garv.student_collaboration.exception.DuplicateStudentSkillException;
 import com.garv.student_collaboration.exception.SkillNotFoundException;
 import com.garv.student_collaboration.exception.StudentNotFoundException;
@@ -44,10 +45,10 @@ public class StudentSkillService {
                 .build();
 
     }
-    public StudentSkillResponse createStudentSkill(StudentSkillRequest studentSkillRequest) {
-        Student student = studentRepository.findById(studentSkillRequest.getStudentId()).orElseThrow(()->new StudentNotFoundException("Student not found"));
+    public StudentSkillResponse createStudentSkill(StudentSkillRequest studentSkillRequest,Long studentId) {
+        Student student = studentRepository.findById(studentId).orElseThrow(()->new StudentNotFoundException("Student not found"));
         Skill skill = skillRepository.findById(studentSkillRequest.getSkillId()).orElseThrow(()->new SkillNotFoundException("Skill not found"));
-        if(studentSkillRepository.existsByStudent_IdAndSkill_Id(studentSkillRequest.getStudentId(),studentSkillRequest.getSkillId())) {
+        if(studentSkillRepository.existsByStudent_IdAndSkill_Id(studentId,studentSkillRequest.getSkillId())) {
             throw new DuplicateStudentSkillException("Student already has this skill");
         }
         StudentSkill savedStudentSkill =studentSkillRepository.save(toEntity(studentSkillRequest,student,skill));

@@ -6,6 +6,7 @@ import com.garv.student_collaboration.service.StudentSkillService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,8 +18,9 @@ public class StudentSkillController {
     private final StudentSkillService studentSkillService;
     @PostMapping("/student-skills")
     @ResponseStatus(HttpStatus.CREATED)
-    public StudentSkillResponse createStudentSkill(@Valid @RequestBody StudentSkillRequest studentSkillRequest) {
-        return studentSkillService.createStudentSkill(studentSkillRequest);
+    public StudentSkillResponse createStudentSkill(@Valid @RequestBody StudentSkillRequest studentSkillRequest, Authentication authentication) {
+        Long studentId = (Long) authentication.getPrincipal();
+        return studentSkillService.createStudentSkill(studentSkillRequest,studentId);
     }
     @GetMapping("/student/{studentId}/skills")
     public List<StudentSkillResponse> getAllStudentSkillByStudentId(@PathVariable Long studentId) {

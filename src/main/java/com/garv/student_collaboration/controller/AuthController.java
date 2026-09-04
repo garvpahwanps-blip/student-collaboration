@@ -1,10 +1,8 @@
 package com.garv.student_collaboration.controller;
 
-import com.garv.student_collaboration.dto.LoginRequest;
-import com.garv.student_collaboration.dto.LoginResponse;
-import com.garv.student_collaboration.dto.RegisterRequest;
-import com.garv.student_collaboration.dto.StudentResponse;
+import com.garv.student_collaboration.dto.*;
 import com.garv.student_collaboration.service.AuthService;
+import com.garv.student_collaboration.service.StudentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
+    private final StudentService studentService;
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/register")
     public StudentResponse register(@Valid @RequestBody RegisterRequest registerRequest){
@@ -30,5 +29,10 @@ public class AuthController {
     public StudentResponse getCurrentStudent(Authentication authentication){
         Long studentId = (Long) authentication.getPrincipal();
         return authService.getCurrentStudent(studentId);
+    }
+    @PatchMapping("/me")
+    public StudentResponse updateCurrentStudent( @Valid @RequestBody UpdateStudentRequest updateStudentRequest,Authentication authentication){
+        Long studentId = (Long) authentication.getPrincipal();
+        return studentService.updateStudent(studentId,updateStudentRequest);
     }
 }
