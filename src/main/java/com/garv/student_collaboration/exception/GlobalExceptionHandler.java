@@ -77,4 +77,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleAuthorizationException(AuthorizationException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
     }
+    @ExceptionHandler(RequestRejectedException.class)
+    public ResponseEntity<String> handleCollaborationRequestNotOpenException(RequestRejectedException e) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(e.getMessage());
+    }
+    @ExceptionHandler(JoinRequestNotFoundException.class)
+    public ResponseEntity<String> handleJoinRequestNotFoundException(JoinRequestNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+    @ExceptionHandler(AlreadyAcceptedAsTeamMemberException.class)
+    public ResponseEntity<String> handleAlreadyAcceptedAsTeamMemberException(AlreadyAcceptedAsTeamMemberException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
 }
