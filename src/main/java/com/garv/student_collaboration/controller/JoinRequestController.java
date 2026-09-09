@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -25,6 +27,16 @@ public class JoinRequestController {
     public  JoinRequestResponse updateJoinRequestStatus(@PathVariable Long joinRequestId, @Valid @RequestBody UpdateJoinRequestStatusRequest updateJoinRequestStatusRequest, Authentication authentication ){
         Long studentId = (Long) authentication.getPrincipal();
         return joinRequestService.updateJoinRequestStatus(joinRequestId, updateJoinRequestStatusRequest, studentId);
+    }
+    @GetMapping("/join-requests/sent")
+    public List<JoinRequestResponse> getSentJoinRequests(Authentication authentication){
+        Long studentId = (Long) authentication.getPrincipal();
+        return joinRequestService.getSentJoinRequests(studentId);
+    }
+    @GetMapping("/join-requests/recived")
+    public List<JoinRequestResponse> getReceivedJoinRequests(Authentication authentication){
+        Long studentId = (Long) authentication.getPrincipal();
+        return joinRequestService.getReceivedJoinRequests(studentId);
     }
 
 }

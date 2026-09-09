@@ -89,4 +89,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleAlreadyAcceptedAsTeamMemberException(AlreadyAcceptedAsTeamMemberException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
+    @ExceptionHandler(CollaborationMemberNotFoundException.class)
+    public ResponseEntity<String> handleCollaborationMemberNotFoundException(CollaborationMemberNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
 }

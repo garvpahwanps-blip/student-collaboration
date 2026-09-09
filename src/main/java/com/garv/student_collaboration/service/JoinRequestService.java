@@ -16,6 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class JoinRequestService {
@@ -23,6 +26,18 @@ public class JoinRequestService {
     private final CollaborationRequestRepository collaborationRequestRepository;
     private final StudentRepository studentRepository;
     private  final CollaborationMemberRepository collaborationMemberRepository;
+    private JoinRequestResponse toResponse(JoinRequest joinRequest){
+        return JoinRequestResponse.builder()
+                .id(joinRequest.getId())
+                .collaborationRequestId(joinRequest.getCollaborationRequest().getId())
+                .requestedById(joinRequest.getRequestedBy().getId())
+                .message(joinRequest.getMessage())
+                .requestedByName(joinRequest.getRequestedBy().getFullName())
+                .createdAt(joinRequest.getCreatedAt())
+                .status(joinRequest.getStatus())
+                .build();
+
+    }
     public JoinRequestResponse createJoinRequest(CreateJoinRequestRequest request,Long studentId){
         CollaborationRequest collaborationRequest = collaborationRequestRepository.findById(request.getCollaborationRequestId()).orElseThrow(()->new CollaborationRequestNotFoundException("CollaborationRequest Not Found"));
         Student student = studentRepository.findById(studentId).orElseThrow(()->new StudentNotFoundException("Student Not Found"));
@@ -39,15 +54,7 @@ public class JoinRequestService {
                 .collaborationRequest(collaborationRequest)
                 .requestedBy(student)
                 .message(request.getMessage()).build());
-        return JoinRequestResponse.builder()
-                .id(savedJoinRequest.getId())
-                .collaborationRequestId(savedJoinRequest.getCollaborationRequest().getId())
-                .requestedById(savedJoinRequest.getRequestedBy().getId())
-                .message(savedJoinRequest.getMessage())
-                .requestedByName(savedJoinRequest.getRequestedBy().getFullName())
-                .createdAt(savedJoinRequest.getCreatedAt())
-                .status(savedJoinRequest.getStatus())
-                .build();
+        return toResponse(savedJoinRequest);
 
     }
     @Transactional
@@ -75,14 +82,30 @@ public class JoinRequestService {
             joinRequest.setStatus(JoinRequest.Status.REJECTED);
         }
         JoinRequest savedJoinRequest =joinRequestRepository.save(joinRequest);
-        return JoinRequestResponse.builder()
-                .id(savedJoinRequest.getId())
-                .status(savedJoinRequest.getStatus())
-                .createdAt(savedJoinRequest.getCreatedAt())
-                .requestedByName(savedJoinRequest.getRequestedBy().getFullName())
-                .requestedById(savedJoinRequest.getRequestedBy().getId())
-                .collaborationRequestId(savedJoinRequest.getCollaborationRequest().getId())
-                .message(savedJoinRequest.getMessage())
-                .build();
+        return toResponse(savedJoinRequest);
+    }
+    @Transactional(readOnly = true)
+    public List<JoinRequestResponse> getSentJoinRequests(Long studentId){
+        if(!studentRepository.existsById(studentId)){
+            throw new StudentNotFoundException("Student Not Found");
+        }
+        List<JoinRequest> joinRequests = joinRequestRepository.findAllByRequestedBy_Id(studentId);
+        List<JoinRequestResponse> joinRequestResponseList = new ArrayList<>();
+        for (JoinRequest joinRequest : joinRequests) {
+            joinRequestResponseList.add(toResponse(joinRequest));
+        }
+        return joinRequestResponseList;
+    }
+    @Transactional(readOnly = true)
+    public List<JoinRequestResponse> getReceivedJoinRequests(Long studentId){
+        if(!studentRepository.existsById(studentId)){
+            throw new StudentNotFoundException("Student Not Found");
+        }
+        List<JoinRequest> joinRequests = joinRequestRepository.findAllByCollaborationRequest_CreatedBy_Id(studentId);
+        List<JoinRequestResponse> joinRequestResponseList = new ArrayList<>();
+        for (JoinRequest joinRequest : joinRequests) {
+            joinRequestResponseList.add(toResponse(joinRequest));
+        }
+        return joinRequestResponseList;
     }
 }
