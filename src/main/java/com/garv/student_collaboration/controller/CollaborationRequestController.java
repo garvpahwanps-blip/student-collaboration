@@ -2,6 +2,7 @@ package com.garv.student_collaboration.controller;
 
 import com.garv.student_collaboration.dto.CollaborationRequestRequest;
 import com.garv.student_collaboration.dto.CollaborationRequestResponse;
+import com.garv.student_collaboration.dto.UpdateCollaborationRequestStatusRequest;
 import com.garv.student_collaboration.service.CollaborationRequestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,5 +34,11 @@ public class CollaborationRequestController {
     @GetMapping("/collaboration-requests/open")
     public List<CollaborationRequestResponse> getOpenCollaborationRequests(){
         return collaborationRequestService.getOpenCollaborationRequests();
+    }
+    @PatchMapping("/collaboration-requests/{collaborationRequestId}/status")
+    @ResponseStatus(HttpStatus.OK)
+    public CollaborationRequestResponse updateRequestStatus(@PathVariable Long collaborationRequestId, @Valid @RequestBody UpdateCollaborationRequestStatusRequest request, Authentication authentication){
+        Long studentId = (Long) authentication.getPrincipal();
+        return collaborationRequestService.updateCollaborationRequestStatus(collaborationRequestId,request,studentId);
     }
 }

@@ -2,13 +2,11 @@ package com.garv.student_collaboration.service;
 
 import com.garv.student_collaboration.dto.CollaborationRequestRequest;
 import com.garv.student_collaboration.dto.CollaborationRequestResponse;
+import com.garv.student_collaboration.dto.UpdateCollaborationRequestStatusRequest;
 import com.garv.student_collaboration.entity.CollaborationRequest;
 import com.garv.student_collaboration.entity.Goal;
 import com.garv.student_collaboration.entity.Student;
-import com.garv.student_collaboration.exception.CollaborationRequestNotFoundException;
-import com.garv.student_collaboration.exception.GoalNotBelongsToStudentException;
-import com.garv.student_collaboration.exception.GoalNotFoundException;
-import com.garv.student_collaboration.exception.StudentNotFoundException;
+import com.garv.student_collaboration.exception.*;
 import com.garv.student_collaboration.repository.CollaborationRequestRepository;
 import com.garv.student_collaboration.repository.GoalRepository;
 import com.garv.student_collaboration.repository.StudentRepository;
@@ -16,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,6 +83,14 @@ public class CollaborationRequestService {
             collaborationRequestResponseList.add(toResponse(collaborationRequest));
         }
         return collaborationRequestResponseList;
+    }
+    public CollaborationRequestResponse updateCollaborationRequestStatus(Long collaborationRequestId, UpdateCollaborationRequestStatusRequest request, Long authenticatedStudentId){
+        CollaborationRequest collaborationRequest = collaborationRequestRepository.findById(collaborationRequestId).orElseThrow(()-> new CollaborationRequestNotFoundException("collaboration request not found"));
+        if(!authenticatedStudentId.equals(collaborationRequest.getCreatedBy().getId())){
+            throw new AuthorizationException("Cannot update this collaboration request");
+        }
+        collaborationRequest.setStatus(request.getStatus());
+        return toResponse(collaborationRequestRepository.save(collaborationRequest));
     }
 
 }
