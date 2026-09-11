@@ -33,10 +33,16 @@ public class JoinRequestController {
         Long studentId = (Long) authentication.getPrincipal();
         return joinRequestService.getSentJoinRequests(studentId);
     }
-    @GetMapping("/join-requests/recived")
+    @GetMapping("/join-requests/received")
     public List<JoinRequestResponse> getReceivedJoinRequests(Authentication authentication){
         Long studentId = (Long) authentication.getPrincipal();
         return joinRequestService.getReceivedJoinRequests(studentId);
+    }
+    @DeleteMapping("/join-requests/{joinRequestId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void cancelJoinRequest(@PathVariable Long joinRequestId,Authentication authentication ){
+        Long studentId = (Long) authentication.getPrincipal();
+        joinRequestService.cancelJoinRequest(joinRequestId, studentId);
     }
 
 }

@@ -108,4 +108,15 @@ public class JoinRequestService {
         }
         return joinRequestResponseList;
     }
+    @Transactional
+    public void cancelJoinRequest(Long joinRequestId,Long authenticatedStudentId){
+        JoinRequest joinRequest = joinRequestRepository.findById(joinRequestId).orElseThrow(()->new JoinRequestNotFoundException("Request Not Found"));
+        if(!joinRequest.getRequestedBy().getId().equals(authenticatedStudentId)){
+            throw new AuthorizationException("You are not allowed to cancel join request");
+        }
+        if(!joinRequest.getStatus().equals(JoinRequest.Status.PENDING)){
+            throw new RequestRejectedException("JoinRequest Not Pending");
+        }
+        joinRequestRepository.delete(joinRequest);
+    }
 }
