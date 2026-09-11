@@ -2,6 +2,7 @@ package com.garv.student_collaboration.service;
 
 import com.garv.student_collaboration.dto.CollaborationRequestRequest;
 import com.garv.student_collaboration.dto.CollaborationRequestResponse;
+import com.garv.student_collaboration.dto.UpdateCollaborationRequestRequest;
 import com.garv.student_collaboration.dto.UpdateCollaborationRequestStatusRequest;
 import com.garv.student_collaboration.entity.CollaborationRequest;
 import com.garv.student_collaboration.entity.Goal;
@@ -14,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,6 +90,26 @@ public class CollaborationRequestService {
             throw new AuthorizationException("Cannot update this collaboration request");
         }
         collaborationRequest.setStatus(request.getStatus());
+        return toResponse(collaborationRequestRepository.save(collaborationRequest));
+    }
+    @Transactional
+    public CollaborationRequestResponse updateCollaborationRequest(Long collaborationRequestId, UpdateCollaborationRequestRequest request, Long authenticatedStudentId){
+        CollaborationRequest collaborationRequest = collaborationRequestRepository.findById(collaborationRequestId).orElseThrow(()->new CollaborationRequestNotFoundException("collaboration request not found"));
+        if(!authenticatedStudentId.equals(collaborationRequest.getCreatedBy().getId())){
+            throw new AuthorizationException("Cannot update this collaboration request");
+        }
+        if(request.getCollaborationMode()!=null){
+            collaborationRequest.setCollaborationMode(request.getCollaborationMode());
+        }
+        if(request.getDescription()!=null){
+            collaborationRequest.setDescription(request.getDescription());
+        }
+        if(request.getWeeklyHours()!=null){
+            collaborationRequest.setWeeklyHours(request.getWeeklyHours());
+        }
+        if(request.getTitle()!=null){
+            collaborationRequest.setTitle(request.getTitle());
+        }
         return toResponse(collaborationRequestRepository.save(collaborationRequest));
     }
 
