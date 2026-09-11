@@ -24,4 +24,11 @@ public class CollaborationMemberController {
         Long studentId = (Long) authentication.getPrincipal();
         collaborationMemberService.removeMember(collaborationRequestId, memberStudentId, studentId);
     }
+    @DeleteMapping("/{collaborationRequestId}/members/me")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void leaveMember(@PathVariable("collaborationRequestId") Long collaborationRequestId, Authentication authentication) {
+        Long studentId = (Long) authentication.getPrincipal();
+        collaborationMemberService.leaveMember(collaborationRequestId, studentId);
+    }
 }
+

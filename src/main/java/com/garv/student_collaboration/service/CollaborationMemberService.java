@@ -50,4 +50,13 @@ public class CollaborationMemberService {
         CollaborationMember member = collaborationMemberRepository.findByCollaborationRequest_IdAndStudent_Id(collaborationRequestId,memberStudentId).orElseThrow(()->new CollaborationMemberNotFoundException("CollaborationMember not found"));
         collaborationMemberRepository.delete(member);
     }
+    @Transactional
+    public void leaveMember(Long collaborationRequestId,Long authenticatedStudentId){
+        if(!collaborationRequestRepository.existsById(collaborationRequestId)) {
+            throw new CollaborationRequestNotFoundException("CollaborationRequest not found");
+        }
+        CollaborationMember collaborationMember = collaborationMemberRepository.findByCollaborationRequest_IdAndStudent_Id(collaborationRequestId,authenticatedStudentId).orElseThrow(()->new CollaborationMemberNotFoundException("CollaborationMember not found"));
+        collaborationMemberRepository.delete(collaborationMember);
+    }
+
 }
