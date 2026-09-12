@@ -13,6 +13,7 @@ import com.garv.student_collaboration.repository.CollaborationMemberRepository;
 import com.garv.student_collaboration.repository.CollaborationRequestRepository;
 import com.garv.student_collaboration.repository.JoinRequestRepository;
 import com.garv.student_collaboration.repository.StudentRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -38,61 +39,57 @@ public class JoinRequestServiceTest {
     private CollaborationMemberRepository collaborationMemberRepository;
     @InjectMocks
     private JoinRequestService joinRequestService;
+    private Long joinRequestId;
+    private Long creatorId;
+    private Long requesterId;
+
+    private Student creator;
+    private Student requester;
+    private CollaborationRequest collaborationRequest;
+    private JoinRequest joinRequest;
+    @BeforeEach
+    void setUp() {
+        joinRequestId = 1L;
+        creatorId = 10L;
+        requesterId = 20L;
+
+        creator = Student.builder().id(creatorId).build();
+        requester = Student.builder().id(requesterId).build();
+        collaborationRequest = CollaborationRequest.builder().id(5L).createdBy(creator).build();
+        joinRequest = JoinRequest.builder().id(joinRequestId).collaborationRequest(collaborationRequest).requestedBy(requester).build();
+        joinRequest.setStatus(JoinRequest.Status.PENDING);
+    }
     @Test
     void cancelJoinRequest_shouldDeletePendingRequestOwnedByStudent(){
-        Long joinRequestId = 1L;
-        Long studentId = 2L;
-        Student student = Student.builder().id(studentId).build();
-        JoinRequest joinRequest = JoinRequest.builder().id(joinRequestId).requestedBy(student).build();
-        joinRequest.setStatus(JoinRequest.Status.PENDING);
         when(joinRequestRepository.findById(joinRequestId)).thenReturn(Optional.of(joinRequest));
-        joinRequestService.cancelJoinRequest(joinRequestId, studentId);
+        joinRequestService.cancelJoinRequest(joinRequestId, requesterId);
         verify(joinRequestRepository).delete(joinRequest);
     }
     @Test
     void cancelJoinRequest_shouldThrowExceptionWhenStudentIsNotOwner(){
-        Long joinRequestId = 1L;
-        Long requestOwnerId = 2L;
         Long anotherStudentId = 3L;
-        Student requestOwner = Student.builder().id(requestOwnerId).build();
-        JoinRequest joinRequest = JoinRequest.builder().id(joinRequestId).requestedBy(requestOwner).build();
-        joinRequest.setStatus(JoinRequest.Status.PENDING);
         when(joinRequestRepository.findById(joinRequestId)).thenReturn(Optional.of(joinRequest));
         assertThrows(AuthorizationException.class,()->joinRequestService.cancelJoinRequest(joinRequestId, anotherStudentId));
         verify(joinRequestRepository,never()).delete(joinRequest);
     }
     @Test
     void cancelJoinRequest_shouldThrowExceptionWhenStatusIsNotPending(){
-        Long joinRequestId = 1L;
-        Long studentId = 2L;
-        Student student = Student.builder().id(studentId).build();
-        JoinRequest joinRequest = JoinRequest.builder().requestedBy(student).build();
         joinRequest.setStatus(JoinRequest.Status.ACCEPTED);
         when(joinRequestRepository.findById(joinRequestId)).thenReturn(Optional.of(joinRequest));
-        assertThrows(RequestRejectedException.class,()->joinRequestService.cancelJoinRequest(joinRequestId, studentId));
+        assertThrows(RequestRejectedException.class,()->joinRequestService.cancelJoinRequest(joinRequestId, requesterId));
         verify(joinRequestRepository,never()).delete(joinRequest);
     }
     @Test
     void cancelJoinRequest_shouldThrowExceptionWhenJoinRequestDoesNotExist(){
-        Long joinRequestId = 1L;
-        Long studentId = 2L;
         when(joinRequestRepository.findById(joinRequestId)).thenReturn(Optional.empty());
-        assertThrows(JoinRequestNotFoundException.class,()->joinRequestService.cancelJoinRequest(joinRequestId, studentId));
+        assertThrows(JoinRequestNotFoundException.class,()->joinRequestService.cancelJoinRequest(joinRequestId, requesterId));
         verify(joinRequestRepository,never()).delete(any(JoinRequest.class));
     }
     @Test
     void updateJoinRequestStatus_shouldAcceptRequestAndCreateMember(){
-        Long joinRequestId = 1L;
-        Long creatorId = 10L;
-        Long requesterId = 20L;
-        Student creator = Student.builder().id(creatorId).build();
-        Student requester = Student.builder().id(requesterId).build();
-        CollaborationRequest collaborationRequest = CollaborationRequest.builder().id(5L).createdBy(creator).build();
-        JoinRequest joinRequest = JoinRequest.builder().id(joinRequestId).collaborationRequest(collaborationRequest).requestedBy(requester).build();
-        joinRequest.setStatus(JoinRequest.Status.PENDING);
         UpdateJoinRequestStatusRequest request = UpdateJoinRequestStatusRequest.builder().decision(UpdateJoinRequestStatusRequest.Decision.ACCEPTED).build();
         when(joinRequestRepository.findById(joinRequestId)).thenReturn(Optional.of(joinRequest));
-        when(collaborationMemberRepository.existsByCollaborationRequest_IdAndStudent_Id(5L,requesterId))
+        when(collaborationMemberRepository.existsByCollaborationRequest_IdAndStudent_Id(collaborationRequest.getId(),requesterId))
         .thenReturn(false);
         when(joinRequestRepository.save(joinRequest)).thenReturn(joinRequest);
         joinRequestService.updateJoinRequestStatus(joinRequestId,request,creatorId);
@@ -107,14 +104,6 @@ public class JoinRequestServiceTest {
     }
     @Test
     void updateJoinRequestStatus_shouldRejectRequestWithoutCreatingMember(){
-        Long joinRequestId = 1L;
-        Long creatorId = 10L;
-        Long requesterId = 20L;
-        Student creator = Student.builder().id(creatorId).build();
-        Student requester = Student.builder().id(requesterId).build();
-        CollaborationRequest collaborationRequest = CollaborationRequest.builder().id(5L).createdBy(creator).build();
-        JoinRequest joinRequest = JoinRequest.builder().id(joinRequestId).collaborationRequest(collaborationRequest).requestedBy(requester).build();
-        joinRequest.setStatus(JoinRequest.Status.PENDING);
         UpdateJoinRequestStatusRequest request = UpdateJoinRequestStatusRequest.builder().decision(UpdateJoinRequestStatusRequest.Decision.REJECTED).build();
         when(joinRequestRepository.findById(joinRequestId)).thenReturn(Optional.of(joinRequest));
         when(joinRequestRepository.save(joinRequest)).thenReturn(joinRequest);
@@ -125,15 +114,8 @@ public class JoinRequestServiceTest {
     }
     @Test
     void updateJoinRequestStatus_shouldThrowExceptionWhenStudentIsNotRequestCreator(){
-        Long joinRequestId = 1L;
-        Long creatorId = 10L;
-        Long requesterId = 20L;
+
         Long anotherStudentId = 99L;
-        Student creator = Student.builder().id(creatorId).build();
-        Student requester = Student.builder().id(requesterId).build();
-        CollaborationRequest collaborationRequest = CollaborationRequest.builder().id(5L).createdBy(creator).build();
-        JoinRequest joinRequest = JoinRequest.builder().id(joinRequestId).collaborationRequest(collaborationRequest).requestedBy(requester).build();
-        joinRequest.setStatus(JoinRequest.Status.PENDING);
         UpdateJoinRequestStatusRequest request = UpdateJoinRequestStatusRequest.builder().decision(UpdateJoinRequestStatusRequest.Decision.ACCEPTED).build();
         when(joinRequestRepository.findById(joinRequestId)).thenReturn(Optional.of(joinRequest));
         assertThrows(AuthorizationException.class,()->joinRequestService.updateJoinRequestStatus(joinRequestId,request,anotherStudentId));
@@ -142,20 +124,11 @@ public class JoinRequestServiceTest {
     }
     @Test
     void updateJoinRequestStatus_shouldThrowExceptionWhenStudentIsAlreadyATeamMember(){
-        Long joinRequestId = 1L;
-        Long creatorId = 10L;
-        Long requesterId = 20L;
-        Student creator = Student.builder().id(creatorId).build();
-        Student requester = Student.builder().id(requesterId).build();
-        CollaborationRequest collaborationRequest = CollaborationRequest.builder().id(5L).createdBy(creator).build();
-        JoinRequest joinRequest = JoinRequest.builder().id(joinRequestId).collaborationRequest(collaborationRequest).requestedBy(requester).build();
         UpdateJoinRequestStatusRequest request = UpdateJoinRequestStatusRequest.builder().decision(UpdateJoinRequestStatusRequest.Decision.ACCEPTED).build();
-        joinRequest.setStatus(JoinRequest.Status.PENDING);
         when(joinRequestRepository.findById(joinRequestId)).thenReturn(Optional.of(joinRequest));
         when(collaborationMemberRepository
                 .existsByCollaborationRequest_IdAndStudent_Id(5L, requesterId))
                 .thenReturn(true);
-        assertEquals(JoinRequest.Status.PENDING, joinRequest.getStatus());
         assertThrows(AlreadyAcceptedAsTeamMemberException.class,()->joinRequestService.updateJoinRequestStatus(joinRequestId,request,creatorId));
         verify(joinRequestRepository,never()).save(any(JoinRequest.class));
         verify(collaborationMemberRepository, never()).save(any(CollaborationMember.class));
