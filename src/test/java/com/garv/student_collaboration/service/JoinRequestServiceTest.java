@@ -1,14 +1,13 @@
 package com.garv.student_collaboration.service;
 
+import com.garv.student_collaboration.dto.CreateJoinRequestRequest;
+import com.garv.student_collaboration.dto.JoinRequestResponse;
 import com.garv.student_collaboration.dto.UpdateJoinRequestStatusRequest;
 import com.garv.student_collaboration.entity.CollaborationMember;
 import com.garv.student_collaboration.entity.CollaborationRequest;
 import com.garv.student_collaboration.entity.JoinRequest;
 import com.garv.student_collaboration.entity.Student;
-import com.garv.student_collaboration.exception.AlreadyAcceptedAsTeamMemberException;
-import com.garv.student_collaboration.exception.AuthorizationException;
-import com.garv.student_collaboration.exception.JoinRequestNotFoundException;
-import com.garv.student_collaboration.exception.RequestRejectedException;
+import com.garv.student_collaboration.exception.*;
 import com.garv.student_collaboration.repository.CollaborationMemberRepository;
 import com.garv.student_collaboration.repository.CollaborationRequestRepository;
 import com.garv.student_collaboration.repository.JoinRequestRepository;
@@ -114,7 +113,6 @@ public class JoinRequestServiceTest {
     }
     @Test
     void updateJoinRequestStatus_shouldThrowExceptionWhenStudentIsNotRequestCreator(){
-
         Long anotherStudentId = 99L;
         UpdateJoinRequestStatusRequest request = UpdateJoinRequestStatusRequest.builder().decision(UpdateJoinRequestStatusRequest.Decision.ACCEPTED).build();
         when(joinRequestRepository.findById(joinRequestId)).thenReturn(Optional.of(joinRequest));
@@ -127,10 +125,81 @@ public class JoinRequestServiceTest {
         UpdateJoinRequestStatusRequest request = UpdateJoinRequestStatusRequest.builder().decision(UpdateJoinRequestStatusRequest.Decision.ACCEPTED).build();
         when(joinRequestRepository.findById(joinRequestId)).thenReturn(Optional.of(joinRequest));
         when(collaborationMemberRepository
-                .existsByCollaborationRequest_IdAndStudent_Id(5L, requesterId))
+                .existsByCollaborationRequest_IdAndStudent_Id(collaborationRequest.getId(), requesterId))
                 .thenReturn(true);
         assertThrows(AlreadyAcceptedAsTeamMemberException.class,()->joinRequestService.updateJoinRequestStatus(joinRequestId,request,creatorId));
         verify(joinRequestRepository,never()).save(any(JoinRequest.class));
         verify(collaborationMemberRepository, never()).save(any(CollaborationMember.class));
+    }
+    @Test
+    void createJoinRequest_shouldCreateNewJoinRequest(){
+        collaborationRequest.setStatus(CollaborationRequest.Status.OPEN);
+        CreateJoinRequestRequest request = CreateJoinRequestRequest.builder().collaborationRequestId(collaborationRequest.getId()).message("I would like to join the project").build();
+        when(collaborationRequestRepository.findById(collaborationRequest.getId())).thenReturn(Optional.of(collaborationRequest));
+        when(studentRepository.findById(requesterId)).thenReturn(Optional.of(requester));
+        when(joinRequestRepository.existsByCollaborationRequest_IdAndRequestedBy_Id(collaborationRequest.getId(), requesterId)).thenReturn(false);
+        when(joinRequestRepository.save((any(JoinRequest.class)))).thenAnswer(invocation ->
+        {
+            JoinRequest requestToSave = invocation.getArgument(0);
+            requestToSave.setId(100L);
+            return requestToSave;
+        });
+        JoinRequestResponse response = joinRequestService.createJoinRequest(request,requesterId);
+        ArgumentCaptor<JoinRequest> joinRequestCaptor = ArgumentCaptor.forClass(JoinRequest.class);
+        verify(joinRequestRepository).save(joinRequestCaptor.capture());
+        JoinRequest savedJoinRequest = joinRequestCaptor.getValue();
+        assertSame(collaborationRequest,savedJoinRequest.getCollaborationRequest());
+        assertSame(requester,savedJoinRequest.getRequestedBy());
+        assertEquals("I would like to join the project",response.getMessage());
+        assertEquals(100L,response.getId());
+        assertEquals(collaborationRequest.getId(),response.getCollaborationRequestId());
+        assertEquals(requesterId,response.getRequestedById());
+    }
+    @Test
+    void createJoinRequest_shouldThrowExceptionWhenCollaborationRequestIsClosed(){
+        collaborationRequest.setStatus(CollaborationRequest.Status.CLOSED);
+        CreateJoinRequestRequest request = CreateJoinRequestRequest.builder().collaborationRequestId(collaborationRequest.getId()).message("I would like to join the project").build();
+        when(collaborationRequestRepository.findById(collaborationRequest.getId())).thenReturn(Optional.of(collaborationRequest));
+        when(studentRepository.findById(requesterId)).thenReturn(Optional.of(requester));
+        assertThrows(RequestRejectedException.class, ()->joinRequestService.createJoinRequest(request,requesterId));
+        verify(joinRequestRepository,never()).save(any(JoinRequest.class));
+    }
+    @Test
+    void createJoinRequest_shouldThrowExceptionWhenOwnerTriesToSendRequestToItsOwnRequest(){
+        collaborationRequest.setStatus(CollaborationRequest.Status.OPEN);
+        CreateJoinRequestRequest request = CreateJoinRequestRequest.builder().collaborationRequestId(collaborationRequest.getId()).message("I would like to join the project").build();
+        when(collaborationRequestRepository.findById(collaborationRequest.getId())).thenReturn(Optional.of(collaborationRequest));
+        when(studentRepository.findById(creatorId)).thenReturn(Optional.of(creator));
+        assertThrows(RequestRejectedException.class, ()->joinRequestService.createJoinRequest(request,creatorId));
+        verify(joinRequestRepository,never()).save(any(JoinRequest.class));
+
+    }
+    @Test
+    void createJoinRequest_shouldThrowExceptionWhenDuplicateRequestExists(){
+        collaborationRequest.setStatus(CollaborationRequest.Status.OPEN);
+        CreateJoinRequestRequest request = CreateJoinRequestRequest.builder().collaborationRequestId(collaborationRequest.getId()).message("I would like to join the project").build();
+        when(collaborationRequestRepository.findById(collaborationRequest.getId())).thenReturn(Optional.of(collaborationRequest));
+        when(studentRepository.findById(requesterId)).thenReturn(Optional.of(requester));
+        when(joinRequestRepository.existsByCollaborationRequest_IdAndRequestedBy_Id(collaborationRequest.getId(), requesterId)).thenReturn(true);
+        assertThrows(RequestRejectedException.class,()->joinRequestService.createJoinRequest(request,requesterId));
+        verify(joinRequestRepository,never()).save(any(JoinRequest.class));
+    }
+    @Test
+    void createJoinRequest_shouldThrowExceptionWhenCollaborationRequestDoesNotExists(){
+        when(collaborationRequestRepository.findById(collaborationRequest.getId())).thenReturn(Optional.empty());
+        CreateJoinRequestRequest request = CreateJoinRequestRequest.builder().collaborationRequestId(collaborationRequest.getId()).message("I would like to join the project").build();
+        assertThrows(CollaborationRequestNotFoundException.class,()->joinRequestService.createJoinRequest(request,requesterId));
+        verify(joinRequestRepository,never()).save(any(JoinRequest.class));
+        verifyNoInteractions(studentRepository);
+    }
+    @Test
+    void createJoinRequest_shouldThrowExceptionWhenStudentDoesNotExists(){
+        collaborationRequest.setStatus(CollaborationRequest.Status.OPEN);
+        CreateJoinRequestRequest request = CreateJoinRequestRequest.builder().collaborationRequestId(collaborationRequest.getId()).message("I would like to join the project").build();
+        when(collaborationRequestRepository.findById(collaborationRequest.getId())).thenReturn(Optional.of(collaborationRequest));
+        when(studentRepository.findById(requesterId)).thenReturn(Optional.empty());
+        assertThrows(StudentNotFoundException.class,()->joinRequestService.createJoinRequest(request,requesterId));
+        verifyNoInteractions(joinRequestRepository);
+
     }
 }
