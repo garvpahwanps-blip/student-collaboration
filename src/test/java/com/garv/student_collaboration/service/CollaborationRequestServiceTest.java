@@ -1,5 +1,7 @@
 package com.garv.student_collaboration.service;
 
+import com.garv.student_collaboration.dto.CollaborationRequestRequest;
+import com.garv.student_collaboration.dto.CollaborationRequestResponse;
 import com.garv.student_collaboration.dto.UpdateCollaborationRequestRequest;
 import com.garv.student_collaboration.dto.UpdateCollaborationRequestStatusRequest;
 import com.garv.student_collaboration.entity.CollaborationRequest;
@@ -13,14 +15,14 @@ import com.garv.student_collaboration.repository.StudentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 
@@ -117,5 +119,34 @@ public class CollaborationRequestServiceTest {
         when(collaborationRequestRepository.findById(collaborationRequestId)).thenReturn(Optional.empty());
         assertThrows(CollaborationRequestNotFoundException.class,()->collaborationRequestService.updateCollaborationRequest(collaborationRequestId,request,ownerId));
         verify(collaborationRequestRepository,never()).save(any(CollaborationRequest.class));
+    }
+    @Test
+    void createCollaborationRequest_shouldSaveOpenRequestWhenGoalBelongsToOwner(){
+        CollaborationRequestRequest request = CollaborationRequestRequest.builder()
+                        .goalId(goal.getId())
+                        .title("Build a study group")
+                        .description("Looking for Java learners")
+                        .weeklyHours(6)
+                        .build();
+        when(studentRepository.findById(ownerId)).thenReturn(Optional.of(owner));
+        when(goalRepository.findById(goal.getId())).thenReturn(Optional.of(goal));
+        when(collaborationRequestRepository.save(any(CollaborationRequest.class)))
+                .thenAnswer(invocation -> {
+                    CollaborationRequest requestToSave = invocation.getArgument(0);
+                    requestToSave.setId(100L);
+                    return requestToSave;
+                });
+        CollaborationRequestResponse response=collaborationRequestService.createCollaborationRequest(request,ownerId);
+        ArgumentCaptor<CollaborationRequest> requestCaptor = ArgumentCaptor.forClass(CollaborationRequest.class);
+        verify(collaborationRequestRepository).save(requestCaptor.capture());
+        CollaborationRequest savedRequest=requestCaptor.getValue();
+        assertSame(owner,savedRequest.getCreatedBy());
+        assertSame(goal,savedRequest.getGoal());
+        assertEquals(CollaborationRequest.Status.OPEN,savedRequest.getStatus());
+        assertEquals("Build a study group",savedRequest.getTitle());
+        assertEquals(100L,response.getId());
+        assertEquals(ownerId,response.getCreatedById());
+        assertEquals(goal.getId(),response.getGoalId());
+
     }
 }
