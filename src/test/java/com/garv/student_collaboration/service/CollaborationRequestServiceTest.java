@@ -7,8 +7,7 @@ import com.garv.student_collaboration.dto.UpdateCollaborationRequestStatusReques
 import com.garv.student_collaboration.entity.CollaborationRequest;
 import com.garv.student_collaboration.entity.Goal;
 import com.garv.student_collaboration.entity.Student;
-import com.garv.student_collaboration.exception.AuthorizationException;
-import com.garv.student_collaboration.exception.CollaborationRequestNotFoundException;
+import com.garv.student_collaboration.exception.*;
 import com.garv.student_collaboration.repository.CollaborationRequestRepository;
 import com.garv.student_collaboration.repository.GoalRepository;
 import com.garv.student_collaboration.repository.StudentRepository;
@@ -148,5 +147,47 @@ public class CollaborationRequestServiceTest {
         assertEquals(ownerId,response.getCreatedById());
         assertEquals(goal.getId(),response.getGoalId());
 
+    }
+    @Test
+    void createCollaborationRequest_shouldThrowExceptionWhenGoalDoesNotBelongToOwner(){
+        Student otherStudent = Student.builder().id(99L).build();
+        Goal foreingGoal = Goal.builder().id(22L).student(otherStudent).build();
+        CollaborationRequestRequest request = CollaborationRequestRequest.builder()
+                .goalId(foreingGoal.getId())
+                .title("Build a study group")
+                .description("Looking for Java learners")
+                .weeklyHours(6)
+                .build();
+        when(studentRepository.findById(ownerId)).thenReturn(Optional.of(owner));
+        when(goalRepository.findById(foreingGoal.getId())).thenReturn(Optional.of(foreingGoal));
+        assertThrows(GoalNotBelongsToStudentException.class,()->collaborationRequestService.createCollaborationRequest(request,ownerId));
+        verifyNoInteractions(collaborationRequestRepository);
+
+    }
+    @Test
+    void createCollaborationRequest_shouldThrowExceptionStudentDoesNotExist(){
+        CollaborationRequestRequest request = CollaborationRequestRequest.builder()
+                .goalId(goal.getId())
+                .title("Build a study group")
+                .description("Looking for Java learners")
+                .weeklyHours(6)
+                .build();
+        when(studentRepository.findById(ownerId)).thenReturn(Optional.empty());
+        assertThrows(StudentNotFoundException.class,()->collaborationRequestService.createCollaborationRequest(request,ownerId));
+        verifyNoInteractions(goalRepository,collaborationRequestRepository);
+
+    }
+    @Test
+    void createCollaborationRequest_shouldThrowExceptionWhenGoalDoesNotExists(){
+        CollaborationRequestRequest request = CollaborationRequestRequest.builder()
+                .goalId(goal.getId())
+                .title("Build a study group")
+                .description("Looking for Java learners")
+                .weeklyHours(6)
+                .build();
+        when(studentRepository.findById(ownerId)).thenReturn(Optional.of(owner));
+        when(goalRepository.findById(goal.getId())).thenReturn(Optional.empty());
+        assertThrows(GoalNotFoundException.class,()->collaborationRequestService.createCollaborationRequest(request,ownerId));
+        verifyNoInteractions(collaborationRequestRepository);
     }
 }
