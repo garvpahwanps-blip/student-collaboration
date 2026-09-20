@@ -2,15 +2,14 @@ package com.garv.student_collaboration;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.test.annotation.DirtiesContext;
 
-@SpringBootTest(properties = {
-		"app.jwt.secret=c3ByaW5nLWJvb3QtdGVzdC1qd3Qtc2VjcmV0LWtleS0zMi1ieXRlcw==",
-		"app.jwt.expiration-ms=3600000"
-})
-class StudentCollaborationApplicationTests {
-
+@Testcontainers
+@SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+class StudentCollaborationApplicationTests extends AbstractIntegrationTest {
 	@Test
 	void contextLoads() {
 	}
-
 }
