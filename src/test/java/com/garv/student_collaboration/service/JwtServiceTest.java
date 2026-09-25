@@ -2,8 +2,7 @@ package com.garv.student_collaboration.service;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JwtServiceTest {
     @Test
@@ -38,5 +37,12 @@ public class JwtServiceTest {
         JwtService tokenValidator = new JwtService(secondSecret,3_000_000L);
         String token = tokenCreator.generateToken(10L);
         assertFalse(tokenValidator.isTokenValid(token));
+    }
+    @Test
+    void isValidToken_shouldReturnTrueForValidToken(){
+        String secret = "c3ByaW5nLWJvb3QtdGVzdC1qd3Qtc2VjcmV0LWtleS0zMi1ieXRlcw==";
+        JwtService tokenCreator = new JwtService(secret,3_000_000L);
+        String token = tokenCreator.generateToken(10L);
+        assertTrue(tokenCreator.isTokenValid(token));
     }
 }
