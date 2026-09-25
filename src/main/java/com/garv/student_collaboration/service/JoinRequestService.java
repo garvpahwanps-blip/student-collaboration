@@ -62,7 +62,7 @@ public class JoinRequestService {
 
         JoinRequest joinRequest = joinRequestRepository.findById(joinRequestId).orElseThrow(()->new JoinRequestNotFoundException("Request Not Found"));
         if(!joinRequest.getStatus().equals(JoinRequest.Status.PENDING)){
-            throw new RequestRejectedException("JoinRequest Not Pending");
+            throw new RequestRejectedException("JoinRequest is Not Pending");
         }
         if(!joinRequest.getCollaborationRequest().getCreatedBy().getId().equals(studentId)){
             throw new AuthorizationException("You are not allowed to update this join request");
