@@ -1,0 +1,104 @@
+.landing-page{
+  min-height: 100vh;
+  background: #f8fafc;
+  color: #0f172a;
+}
+.site-header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem clamp(1.5rem,5vw,5rem);
+}
+.brand{
+  color: #0f172a;
+  font-size: 1.25rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+.site-header nav{
+  display: flex;
+  gap:1.5rem;
+}
+.site-header nav a{
+  color: #475569;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.site-header nav a:hover {
+  color: #2563eb;
+}
+
+.login-button,
+.primary-button,
+.secondary-button {
+  border: 0;
+  border-radius: 0.6rem;
+  padding: 0.75rem 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.login-button,
+.secondary-button {
+  color: #0f172a;
+  background: transparent;
+}
+
+.primary-button {
+  color: #ffffff;
+  background: #2563eb;
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+}
+
+.primary-button:hover {
+  background: #1d4ed8;
+}
+
+.hero-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: clamp(6rem, 16vw, 11rem) 1.5rem;
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #2563eb;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero-section h1 {
+  margin: 1rem 0 0;
+  font-size: clamp(2.75rem, 7vw, 5rem);
+  line-height: 1.05;
+  letter-spacing: -0.05em;
+}
+
+.hero-copy {
+  max-width: 38rem;
+  margin: 1.5rem 0 0;
+  color: #475569;
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 640px) {
+  .site-header nav {
+    display: none;
+  }
+}
