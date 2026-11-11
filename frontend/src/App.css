@@ -342,8 +342,17 @@ button:disabled {
   color: #fff;
   background: #2563eb;
   border-radius: 50%;
-  font-size: 0.65rem;
   box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.12);
+}
+
+.user-icon svg {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
 }
 
 .menu-arrow {
