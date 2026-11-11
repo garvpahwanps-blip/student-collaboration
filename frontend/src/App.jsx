@@ -416,7 +416,12 @@ function ProfileMenu({ student, onLogout }) {
         aria-expanded={isOpen}
         aria-label="Open profile menu"
       >
-        <span className="user-icon" aria-hidden="true">●</span>
+        <span className="user-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <circle cx="12" cy="8" r="3.5" />
+            <path d="M5.5 20c.8-3.6 3-5.5 6.5-5.5s5.7 1.9 6.5 5.5" />
+          </svg>
+        </span>
         <span>{student.fullName}</span>
         <span className="menu-arrow" aria-hidden="true">⌄</span>
       </button>
